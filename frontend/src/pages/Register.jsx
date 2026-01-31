@@ -3,7 +3,48 @@ import { Link } from 'react-router-dom';
 import { Mail, Lock, User, MapPin, Phone, Briefcase, UserCheck } from 'lucide-react';
 
 const Register = () => {
-    const [role, setRole] = useState('jobseeker');
+    const [role, setRole] = useState('JOBSEEKER');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [city, setCity] = useState('');
+    const [password, setPassword] = useState('');
+
+
+    let data = {
+        name: name,
+        email: email,
+        phone: phone,
+        city: city,
+        password: password,
+        role: role
+    }
+
+    const handleRegister = (e) => {
+        e.preventDefault();
+        sendDataToBackend(data);
+    };
+    const sendDataToBackend = async (data) => {
+        try {
+            const response = await fetch("http://localhost:5001/api/auth/register", {
+                method: "POST", // Specify the method
+                headers: {
+                    "Content-Type": "application/json", // Tell the server we're sending JSON
+                },
+                body: JSON.stringify(data), // The data, stringified
+            });
+
+            if (!response.ok) {
+                // Handle non-successful responses (e.g., status 400, 500)
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json(); // Parse the JSON response from the backend
+            console.log("Success:", result);
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
 
     return (
         <div className="min-h-[calc(100vh-64px)] bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -28,18 +69,18 @@ const Register = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-3">I am a...</label>
                             <div className="grid grid-cols-2 gap-4">
                                 <div
-                                    onClick={() => setRole('jobseeker')}
-                                    className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center justify-center transition-all ${role === 'jobseeker' ? 'border-secondary bg-emerald-50 ring-1 ring-secondary' : 'border-gray-200 hover:border-gray-300'}`}
+                                    onClick={() => setRole('JOBSEEKER')}
+                                    className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center justify-center transition-all ${role === 'jobseeker' ? ' bg-gray-200 ring-1 ring-primary hover:border-gray-300' : 'border-gray-200 hover:border-gray-300'}`}
                                 >
-                                    <UserCheck className={`h-8 w-8 mb-2 ${role === 'jobseeker' ? 'text-secondary' : 'text-gray-400'}`} />
-                                    <span className={`text-sm font-bold ${role === 'jobseeker' ? 'text-secondary' : 'text-gray-500'}`}>Job Seeker</span>
+                                    <UserCheck className={`h-8 w-8 mb-2 ${role === 'JOBSEEKER' ? 'text-secondary' : 'text-gray-400'}`} />
+                                    <span className={`text-sm font-bold ${role === 'JOBSEEKER' ? 'text-secondary' : 'text-gray-500'}`}>Job Seeker</span>
                                 </div>
                                 <div
-                                    onClick={() => setRole('recruiter')}
-                                    className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center justify-center transition-all ${role === 'recruiter' ? 'border-primary bg-indigo-50 ring-1 ring-primary' : 'border-gray-200 hover:border-gray-300'}`}
+                                    onClick={() => setRole('RECRUITER')}
+                                    className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center justify-center transition-all ${role === 'RECRUITER' ? ' bg-gray-200 ring-1 ring-primary hover:border-gray-300' : 'border-gray-200 hover:border-gray-300'}`}
                                 >
-                                    <Briefcase className={`h-8 w-8 mb-2 ${role === 'recruiter' ? 'text-primary' : 'text-gray-400'}`} />
-                                    <span className={`text-sm font-bold ${role === 'recruiter' ? 'text-primary' : 'text-gray-500'}`}>Recruiter</span>
+                                    <Briefcase className={`h-8 w-8 mb-2 ${role === 'RECRUITER' ? 'text-primary' : 'text-gray-400'}`} />
+                                    <span className={`text-sm font-bold ${role === 'RECRUITER' ? 'text-primary' : 'text-gray-500'}`}>Recruiter</span>
                                 </div>
                             </div>
                         </div>
@@ -51,7 +92,7 @@ const Register = () => {
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <User className="h-5 w-5 text-gray-400" />
                                 </div>
-                                <input type="text" id="name" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="John Doe" />
+                                <input type="text" name="name" value={name} onChange={(e) => setName(e.target.value)} id="name" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="John Doe" />
                             </div>
                         </div>
 
@@ -62,7 +103,7 @@ const Register = () => {
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Mail className="h-5 w-5 text-gray-400" />
                                 </div>
-                                <input type="email" id="email" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="name@example.com" />
+                                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" id="email" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="name@example.com" />
                             </div>
                         </div>
 
@@ -74,7 +115,7 @@ const Register = () => {
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <Phone className="h-5 w-5 text-gray-400" />
                                     </div>
-                                    <input type="tel" id="phone" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="+1 (555) 987-6543" />
+                                    <input type="tel" name='phone' value={phone} onChange={(e) => setPhone(e.target.value)} id="phone" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="+1 (555) 987-6543" />
                                 </div>
                             </div>
 
@@ -84,7 +125,7 @@ const Register = () => {
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <MapPin className="h-5 w-5 text-gray-400" />
                                     </div>
-                                    <input type="text" id="city" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="New York" />
+                                    <input type="text" value={city} name="city" onChange={(e) => setCity(e.target.value)} id="city" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="New York" />
                                 </div>
                             </div>
                         </div>
@@ -96,14 +137,15 @@ const Register = () => {
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Lock className="h-5 w-5 text-gray-400" />
                                 </div>
-                                <input type="password" id="password" required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="••••••••" />
+                                <input type="password" id="password" name='passward' value={password} onChange={(e) => setPassword(e.target.value)} required className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50" placeholder="••••••••" />
                             </div>
                         </div>
 
                         <div>
                             <button
                                 type="submit"
-                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === 'recruiter' ? 'bg-primary hover:bg-indigo-700 focus:ring-primary' : 'bg-secondary hover:bg-emerald-600 focus:ring-secondary'}`}
+                                onClick={handleRegister}
+                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === 'recruiter' ? 'bg-primary hover:bg-indigo-700 focus:ring-primary' : 'bg-primary hover:bg-indigo-700 focus:ring-primary'}`}
                             >
                                 Register as {role === 'recruiter' ? 'Recruiter' : 'Job Seeker'}
                             </button>

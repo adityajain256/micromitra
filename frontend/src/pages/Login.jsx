@@ -1,8 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, LogIn } from 'lucide-react';
 
 const Login = () => {
+    const [formData, setFormData] = useState({
+        email: "",
+        password: ""
+    });
+
+    const API_URL = "http://localhost:5001/api/auth/login";
+
+    const handleLogin = async (data) => {
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.token) {
+                localStorage.setItem('token', "Bearer " + result.token);
+            }
+            if (!response.ok) {
+                console.error("Login Error:", result);
+                alert(result.error || result.message || "Login failed");
+                return;
+            }
+
+            console.log("Login Success:", result);
+            // TODO: Store token and redirect
+        } catch (error) {
+            console.error("Network Error:", error.message);
+        }
+    };
+
+    const handleSendData = (e) => {
+        e.preventDefault();
+        handleLogin(formData);
+    };
+
     return (
         <div className="min-h-[calc(100vh-64px)] bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -24,7 +65,7 @@ const Login = () => {
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-100">
-                    <form className="space-y-6">
+                    <form className="space-y-6" onSubmit={handleSendData}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 Email address
@@ -37,6 +78,8 @@ const Login = () => {
                                     id="email"
                                     name="email"
                                     type="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     autoComplete="email"
                                     required
                                     className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50"
@@ -57,6 +100,8 @@ const Login = () => {
                                     id="password"
                                     name="password"
                                     type="password"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     autoComplete="current-password"
                                     required
                                     className="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3 bg-gray-50/50"
