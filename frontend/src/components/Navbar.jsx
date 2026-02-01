@@ -1,10 +1,17 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Briefcase } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const Navbar = () => {
     const location = useLocation();
     const isLanding = location.pathname === '/';
+    const token = localStorage.getItem("token");
+
+    const logout = () => {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+    }
 
     return (
         <nav className="bg-white shadow-sm border-b border-gray-100">
@@ -22,10 +29,29 @@ const Navbar = () => {
                                 Switch Role
                             </Link>
                         )}
-                        <Link to="/login" className="text-gray-500 hover:text-primary font-medium text-sm">Log in</Link>
-                        <Link to="/register" className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
-                            Sign up
-                        </Link>
+                        {!token ?
+                            <>
+
+                                <Link to="/login" className="text-gray-500 hover:text-primary font-medium text-sm">Log in</Link>
+                                <Link to="/register" className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+                                    Sign up
+                                </Link>
+
+                            </>
+                            : <>
+                                <Link to="/dashboard" className="text-gray-500 hover:text-primary font-medium text-sm"><Avatar>
+                                    <AvatarImage
+                                        src={localStorage.getItem("userPic")}
+                                        alt="@shadcn"
+                                        className="grayscale"
+                                    />
+                                    <AvatarFallback>DP</AvatarFallback>
+                                </Avatar></Link>
+                                <button onClick={logout} className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+                                    Log out
+                                </button>
+                            </>
+                        }
                     </div>
                 </div>
             </div>

@@ -3,10 +3,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import RecruiterDashboard from './pages/RecruiterDashboard';
+import Footer from './components/Footer';
 import JobSeekerDashboard from './pages/JobSeekerDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { PostJob } from './pages/PostJob';
+import Dashboard from './pages/dashboard/Dashboard.jsx';
+import UpdatePicture from './pages/dashboard/UpdatePicture';
+import EditProfile from './pages/dashboard/EditProfile';
 
 function App() {
   return (
@@ -14,6 +18,9 @@ function App() {
       <div className="min-h-screen bg-background font-sans text-text">
         <Navbar />
         <Routes>
+          <Route path="/update-picture" element={<UpdatePicture />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/" element={<LandingPage />} />
           <Route path="/recruiter" element={<RecruiterDashboard />} />
           <Route path="/jobseeker" element={<JobSeekerDashboard />} />
@@ -21,6 +28,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/post-job" element={<PostJob />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );

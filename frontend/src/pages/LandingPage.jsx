@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { UserCheck, Search } from 'lucide-react';
 
+
 const LandingPage = () => {
     return (
         <div className="min-h-[calc(100vh-64px)] bg-gray-50 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">

@@ -33,6 +33,8 @@ const Login = () => {
             }
 
             console.log("Login Success:", result);
+            window.location.href = "/";
+
             // TODO: Store token and redirect
         } catch (error) {
             console.error("Network Error:", error.message);

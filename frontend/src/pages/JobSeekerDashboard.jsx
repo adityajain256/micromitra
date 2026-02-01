@@ -50,7 +50,7 @@ const JobSeekerDashboard = () => {
                     <th className="border border-gray-300 p-2">Job Type</th>
                     <th className="border border-gray-300 p-2">Address</th>
                 </tr>
-                // function for mapping all the data we get from the API
+                {/* function for mapping all the data we get from the API*/}
                 {jobs.map(job => {
                     return (
                         <tr key={job.id} className="border border-gray-300">

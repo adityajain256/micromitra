@@ -41,6 +41,7 @@ const Register = () => {
 
             const result = await response.json(); // Parse the JSON response from the backend
             console.log("Success:", result);
+            window.location.href = "/";
         } catch (error) {
             console.error("Error:", error);
         }
