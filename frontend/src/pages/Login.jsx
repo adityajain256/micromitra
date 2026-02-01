@@ -24,7 +24,7 @@ const Login = () => {
             const result = await response.json();
 
             if (result.token) {
-                localStorage.setItem('token', "Bearer " + result.token);
+                localStorage.setItem('token', result.token);
             }
             if (!response.ok) {
                 console.error("Login Error:", result);
