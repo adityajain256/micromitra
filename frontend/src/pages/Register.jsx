@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from "../context/AuthContext";
 import { Mail, Lock, User, MapPin, Phone, Briefcase, UserCheck } from 'lucide-react';
 
 const Register = () => {
@@ -20,30 +21,21 @@ const Register = () => {
         role: role
     }
 
-    const handleRegister = (e) => {
+    const { register } = useAuth();
+    const [loading, setLoading] = useState(false);
+
+    const handleRegister = async (e) => {
         e.preventDefault();
-        sendDataToBackend(data);
-    };
-    const sendDataToBackend = async (data) => {
+        setLoading(true);
         try {
-            const response = await fetch("http://localhost:5001/api/auth/register", {
-                method: "POST", // Specify the method
-                headers: {
-                    "Content-Type": "application/json", // Tell the server we're sending JSON
-                },
-                body: JSON.stringify(data), // The data, stringified
-            });
-
-            if (!response.ok) {
-                // Handle non-successful responses (e.g., status 400, 500)
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json(); // Parse the JSON response from the backend
-            console.log("Success:", result);
-            window.location.href = "/";
+            await register({ ...data, role });
+            // Redirect to login or auto-login (depends on context logic, but let's go to login for now)
+            window.location.href = "/login";
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Register Error:", error);
+            alert(error.response?.data?.message || "Registration failed");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -71,7 +63,7 @@ const Register = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div
                                     onClick={() => setRole('JOBSEEKER')}
-                                    className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center justify-center transition-all ${role === 'jobseeker' ? ' bg-gray-200 ring-1 ring-primary hover:border-gray-300' : 'border-gray-200 hover:border-gray-300'}`}
+                                    className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center justify-center transition-all ${role === 'JOBSEEKER' ? ' bg-gray-200 ring-1 ring-primary hover:border-gray-300' : 'border-gray-200 hover:border-gray-300'}`}
                                 >
                                     <UserCheck className={`h-8 w-8 mb-2 ${role === 'JOBSEEKER' ? 'text-secondary' : 'text-gray-400'}`} />
                                     <span className={`text-sm font-bold ${role === 'JOBSEEKER' ? 'text-secondary' : 'text-gray-500'}`}>Job Seeker</span>
@@ -146,9 +138,9 @@ const Register = () => {
                             <button
                                 type="submit"
                                 onClick={handleRegister}
-                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === 'recruiter' ? 'bg-primary hover:bg-indigo-700 focus:ring-primary' : 'bg-primary hover:bg-indigo-700 focus:ring-primary'}`}
+                                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${role === 'RECRUITER' ? 'bg-primary hover:bg-indigo-700 focus:ring-primary' : 'bg-primary hover:bg-indigo-700 focus:ring-primary'}`}
                             >
-                                Register as {role === 'recruiter' ? 'Recruiter' : 'Job Seeker'}
+                                Register as {role === 'RECRUITER' ? 'Recruiter' : 'Job Seeker'}
                             </button>
                         </div>
                     </form>

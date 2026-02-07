@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from "../context/AuthContext";
 import { Mail, Lock, LogIn } from 'lucide-react';
 
 const Login = () => {
@@ -8,36 +9,19 @@ const Login = () => {
         password: ""
     });
 
-    const API_URL = "http://localhost:5001/api/auth/login";
+    const { login } = useAuth();
+    const [loading, setLoading] = useState(false);
 
     const handleLogin = async (data) => {
+        setLoading(true);
         try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-
-            if (result.token) {
-                localStorage.setItem('token', result.token);
-            }
-            if (!response.ok) {
-                console.error("Login Error:", result);
-                alert(result.error || result.message || "Login failed");
-                return;
-            }
-
-            console.log("Login Success:", result);
-            window.location.href = "/";
-
-            // TODO: Store token and redirect
+            await login(data.email, data.password);
+            window.location.href = "/dashboard"; // Redirect after successful login
         } catch (error) {
-            console.error("Network Error:", error.message);
+            console.error("Login Error:", error);
+            alert(error.response?.data?.message || "Login failed");
+        } finally {
+            setLoading(false);
         }
     };
 

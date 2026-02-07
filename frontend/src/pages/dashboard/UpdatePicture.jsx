@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from "../../lib/api";
 import { Button } from "@/components/ui/button";
 import { Folder, UploadCloud, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -34,36 +35,22 @@ const UpdatePicture = () => {
         formData.append('profilePicture', image);
 
         try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                alert("You must be logged in to upload a picture.");
-                navigate('/login');
-                return;
-            }
-
-            const response = await fetch("http://localhost:5001/api/users/uploadProfilePicture", {
-                method: "PATCH",
+            const response = await api.patch("/uploadProfilePicture", formData, {
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
                 },
-                body: formData
             });
 
-            const data = await response.json();
+            const data = response.data;
+            console.log("Upload success:", data);
+            alert("Profile picture updated successfully!");
+            // Update auth user or local storage
+            localStorage.setItem("userPic", data.message); // If message is the URL
+            navigate('/dashboard');
 
-            if (response.ok) {
-                console.log("Upload success:", data);
-                alert("Profile picture updated successfully!");
-                localStorage.setItem("userPic", data.message)
-                navigate('/dashboard');
-
-            } else {
-                console.error("Upload failed:", data);
-                alert(data.message || "Failed to upload image.");
-            }
         } catch (error) {
             console.error("Network error:", error);
-            alert("An error occurred during upload.");
+            alert(error.response?.data?.message || "Failed to upload image.");
         } finally {
             setIsLoading(false);
         }

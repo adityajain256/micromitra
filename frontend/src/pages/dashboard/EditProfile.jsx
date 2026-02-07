@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from "../../lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,18 +29,14 @@ const EditProfile = () => {
                 return;
             }
             try {
-                const response = await fetch("http://localhost:5001/api/users/profile", {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setFormData(prev => ({
-                        ...prev,
-                        name: data.message.name || '',
-                        number: data.message.number || '', // Assuming backend provides 'number' or 'phoneNumber'
-                        city: data.message.city || ''
-                    }));
-                }
+                const response = await api.get("/profile");
+                const data = response.data;
+                setFormData(prev => ({
+                    ...prev,
+                    name: data.message.name || '',
+                    number: data.message.number || data.message.phone || '',
+                    city: data.message.city || ''
+                }));
             } catch (error) {
                 console.error("Failed to fetch profile:", error);
             } finally {
@@ -58,32 +55,18 @@ const EditProfile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        const token = localStorage.getItem("token");
 
         try {
             // Filter out empty password if not changing
             const payload = { ...formData };
             if (!payload.password) delete payload.password;
 
-            const response = await fetch("http://localhost:5001/api/users/profileUpdate", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                alert("Profile updated successfully!");
-                navigate('/dashboard');
-            } else {
-                alert(data.message || "Failed to update profile");
-            }
+            await api.patch("/profileUpdate", payload);
+            alert("Profile updated successfully!");
+            navigate('/dashboard');
         } catch (error) {
             console.error("Update error:", error);
-            alert("An error occurred while updating profile");
+            alert(error.response?.data?.message || "Failed to update profile");
         } finally {
             setIsLoading(false);
         }
