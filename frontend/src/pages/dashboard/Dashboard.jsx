@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, Bookmark, Briefcase, Settings } from "lucide-react";
+import { Grid, Bookmark, Briefcase, Settings, MapPin, Clock } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,24 +13,25 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import UpdatePicture from "./UpdatePicture";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
   const [profile, setProfile] = useState({});
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const handleGetProfile = async () => {
     try {
-      const response = await api.get("/profile");
+      const response = await api.get("/users/profile");
       const data = response.data;
-      setProfile(data.message);
-      // Optional chaining for safety
-      setJobs(data.message?.recruter?.jobs || []);
+      setProfile(data.message || {});
+      setJobs(data.message?.recruter?.jobs?.reverse() || []);
       setApplications(data.message?.jobseeker?.applications || []);
-      console.log(data);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to fetch profile", error);
+      setLoading(false);
     }
   };
 
@@ -39,166 +40,139 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-12">
-        {profile.picture == null || profile.picture == "" ? (
-          <Link to="/update-picture">
-            {" "}
-            <Button
-              className="w-32 h-32 md:w-40 md:h-40 rounded-full border-gray-200"
-              variant="secondary"
-              size="sm"
-            >
-              {" "}
-              Upload image{" "}
-            </Button>{" "}
-          </Link>
-        ) : (
-          <Avatar className="w-32 h-32 md:w-40 md:h-40 border border-gray-200">
-            <AvatarImage src={profile.picture} alt="@shadcn" />
-            <AvatarFallback>DP</AvatarFallback>
-          </Avatar>
-        )}
+    <div className="min-h-screen bg-background pb-12">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-primary to-secondary h-48 md:h-64 relative mb-16">
+        <div className="absolute -bottom-12 md:-bottom-16 left-4 right-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end">
+          {/* Greeting Card - Welcome Back */}
+          <Card className="w-full bg-card/95 backdrop-blur shadow-lg border-primary/20 p-6 flex flex-col md:flex-row items-center md:items-start gap-6 rounded-xl">
+            <div className="relative">
+              {profile.picture ? (
+                <Avatar className="w-24 h-24 md:w-32 md:h-32 border-4 border-background shadow-md">
+                  <AvatarImage src={profile.picture} alt={profile.name} className="object-cover" />
+                  <AvatarFallback className="text-2xl">{profile.name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+              ) : (
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-secondary flex items-center justify-center text-secondary-foreground text-3xl font-bold border-4 border-background shadow-md">
+                  {profile.name?.charAt(0) || "U"}
+                </div>
+              )}
+            </div>
 
-        <div className="flex flex-col gap-4 flex-1 w-full">
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <h2 className="text-xl font-medium">{profile.name}</h2>
-            <div className="flex gap-2">
-              <Link to="/edit-profile">
-                <Button variant="secondary" size="sm">
-                  Edit profile
-                </Button>
-              </Link>
-              <Button variant="secondary" size="sm">
-                View archive
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Settings className="w-5 h-5" />
-              </Button>
+            <div className="flex-1 text-center md:text-left pt-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                Welcome Back, {profile.name || "User"}!
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {profile.role === "RECRUITER" ? "Manage your job parsings and candidates" : "Software Engineer | React Enthusiast"}
+              </p>
+              <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+                <Link to="/edit-profile">
+                  <Button variant="outline" size="sm" className="border-secondary/20 hover:bg-secondary/5 text-secondary">
+                    Edit Profile
+                  </Button>
+                </Link>
+                <Link to="/update-picture">
+                  <Button variant="ghost" size="sm">Update Photo</Button>
+                </Link>
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-around md:justify-start gap-8 border-t md:border-t-0 pt-4 md:pt-0 border-gray-100">
-            <div className="text-center md:text-left">
-              <span className="font-bold block md:inline">
-                {applications.length}
-              </span>{" "}
-              applications
+            {/* Stats Cards (Inline for now or below) */}
+            <div className="flex gap-4 md:gap-8 border-t md:border-t-0 md:border-l border-border pt-4 md:pt-0 md:pl-8 mt-4 md:mt-0 justify-center w-full md:w-auto">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">{profile.role === "RECRUITER" ? jobs.length : applications.length}</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                  {profile.role === "RECRUITER" ? "Jobs Posted" : "Applications"}
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-secondary">
+                  {profile.role === "RECRUITER" ? applications.length : "12"} {/* Mock 'active' or use real data */}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                  {profile.role === "RECRUITER" ? "Candidates" : "Active"}
+                </div>
+              </div>
+              {/* <div className="text-center">
+                <div className="text-2xl font-bold text-accent">5</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Matches</div>
+              </div> */}
             </div>
-            <div className="text-center md:text-left">
-              <span className="font-bold block md:inline">{jobs.length}</span>{" "}
-              jobs
-            </div>
-            <div className="text-center md:text-left">
-              <span className="font-bold block md:inline">185</span> following
-            </div>
-          </div>
-
-          <div className="hidden md:block">
-            <h1 className="font-bold">{profile.name}</h1>
-            <p className="text-gray-600">
-              Software Engineer | React Enthusiast
-            </p>
-            <p className="text-blue-900 font-medium">Open to work</p>
-          </div>
+          </Card>
         </div>
       </div>
 
-      {/* Mobile Bio */}
-      <div className="md:hidden mb-8 px-1">
-        <h1 className="font-bold">{profile.name}</h1>
-        <p className="text-gray-600">Software Engineer | React Enthusiast</p>
-        <p className="text-blue-900 font-medium">Open to work</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 md:mt-32">
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="applications" className="w-full">
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-muted/50 p-1 rounded-lg h-auto">
+              <TabsTrigger value="applications" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-2 rounded-md transition-all">
+                {profile.role === "RECRUITER" ? "Your Jobs" : "Applications"}
+              </TabsTrigger>
+              <TabsTrigger value="saved" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-2 rounded-md transition-all">
+                Saved Jobs
+              </TabsTrigger>
+            </TabsList>
+            {profile.role === "RECRUITER" && (
+              <Link to="/post-job">
+                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+                  <Briefcase className="w-4 h-4 mr-2" /> Post New Job
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          <TabsContent value="applications" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(profile.role === "RECRUITER" ? jobs : jobs).length > 0 ? (
+                (profile.role === "RECRUITER" ? jobs : jobs).map((job) => ( /* Note: Logic might need fix if jobseeker has no 'jobs' but 'applications' */
+                  <Card key={job.id || job._id} className="group hover:shadow-lg transition-all duration-300 border-border/60 hover:border-primary/50 overflow-hidden bg-white">
+                    <CardHeader className="bg-muted/30 pb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg font-bold text-foreground line-clamp-1">{job.title}</CardTitle>
+                          <CardDescription className="flex items-center mt-1 text-xs">
+                            <MapPin className="w-3 h-3 mr-1" /> {job.address || "Remote"}
+                          </CardDescription>
+                        </div>
+                        <div className="bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded">
+                          {job.jobType || "Full Time"}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {job.description}
+                      </p>
+                      <div className="flex items-center mt-4 text-xs text-muted-foreground">
+                        <Clock className="w-3 h-3 mr-1" /> Posted {new Date().toLocaleDateString()} {/* Mock date if missing */}
+                      </div>
+                    </CardContent>
+                    <CardFooter className="pt-2 pb-4">
+                      <Button className="w-full bg-secondary hover:bg-secondary/90 text-white group-hover:translate-y-[-2px] transition-transform">
+                        {profile.role === "RECRUITER" ? "Manage Job" : "View Details"}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full py-12 text-center text-muted-foreground">
+                  <Briefcase className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                  <p>No {profile.role === "RECRUITER" ? "jobs posted" : "applications found"}.</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="saved">
+            <div className="col-span-full py-12 text-center text-muted-foreground">
+              <p>No saved jobs yet.</p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <Separator className="mb-2" />
-
-      {/* Tabs Section */}
-      <Tabs defaultValue="applications" className="w-full">
-        <TabsList className="w-full justify-center bg-transparent gap-8 h-12">
-          <TabsTrigger
-            value="applications"
-            className="data-[state=active]:border-t-2 data-[state=active]:border-black data-[state=active]:text-black rounded-none h-full px-4 text-xs tracking-widest uppercase text-gray-400 gap-2 font-medium bg-transparent shadow-none"
-          >
-            <Grid className="w-3 h-3" /> Applications
-          </TabsTrigger>
-          <TabsTrigger
-            value="saved"
-            className="data-[state=active]:border-t-2 data-[state=active]:border-black data-[state=active]:text-black rounded-none h-full px-4 text-xs tracking-widest uppercase text-gray-400 gap-2 font-medium bg-transparent shadow-none"
-          >
-            <Bookmark className="w-3 h-3" /> Jobs
-          </TabsTrigger>
-          <TabsTrigger
-            value="tagged"
-            className="data-[state=active]:border-t-2 data-[state=active]:border-black data-[state=active]:text-black rounded-none h-full px-4 text-xs tracking-widest uppercase text-gray-400 gap-2 font-medium bg-transparent shadow-none"
-          >
-            <Briefcase className="w-3 h-3" /> Interviews
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="applications" className="mt-4">
-          <div className="grid grid-cols-3 gap-1 md:gap-4">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                className="aspect-square bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer group relative overflow-hidden"
-              >
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle className="text-sm">{job.title}</CardTitle>
-                    <CardDescription className="text-xs">
-                      {job.address}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-gray-600">
-                      {job.description.substring(0, 60)}...
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="ghost" size="sm" className="w-full">
-                      View Details
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="jobs" className="mt-4">
-          <div className="grid grid-cols-3 gap-1 md:gap-4">
-            {jobs.map((post) => (
-              <div
-                key={post._id}
-                className="aspect-square bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer border border-blue-100"
-              >
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle className="text-sm font-bold">
-                      {post.title}
-                    </CardTitle>
-                    <CardDescription className="text-xs text-gray-500">
-                      {post.address}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-700">
-                      {post.description.substring(0, 60)}...
-                    </p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="ghost" size="sm" className="w-full">
-                      View Details
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };

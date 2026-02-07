@@ -9,8 +9,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { PostJob } from "./pages/PostJob";
 import Dashboard from "./pages/dashboard/Dashboard.jsx";
-import UpdatePicture from "./pages/dashboard/UpdatePicture";
+import { UpdatePicture } from "./pages/dashboard/UpdatePicture";
 import EditProfile from "./pages/dashboard/EditProfile";
+import Jobs from "./pages/jobs/Jobs";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Routes>
             <Route path="/update-picture" element={<UpdatePicture />} />
             <Route path="/edit-profile" element={<EditProfile />} />
+            <Route path="/jobs" element={<Jobs />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/recruiter" element={<RecruiterDashboard />} />
             <Route path="/" element={<Landing />} />

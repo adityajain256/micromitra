@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import api from "../lib/api";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Briefcase, MapPin, DollarSign, FileText } from "lucide-react";
 
 export const PostJob = () => {
   const navigate = useNavigate();
@@ -13,112 +18,167 @@ export const PostJob = () => {
     jobStatus: "OPEN",
     jobType: "",
   });
+  const [loading, setLoading] = useState(false);
+
   const handlePostJob = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       // Swagger says POST / for creating a job
-      const response = await api.post("/", formData);
+      const response = await api.post("/jobs/", formData);
       const data = response.data;
       if (!data) {
         alert("No data returned");
       }
-      navigate("/recruiter");
+      navigate("/dashboard");
     } catch (error) {
       console.error(error);
       alert(error.response?.data?.message || "Failed to post job");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <>
-      <h1>Job Posting Page</h1>
-      <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10 border border-gray-100">
-        <form onSubmit={handlePostJob} className="flex flex-col gap-5">
-          <input
-            className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-            type="text"
-            placeholder="Job Title"
-            name="title"
-            value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
-          />
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 flex justify-center">
+      <Card className="w-full max-w-3xl shadow-lg border-border/60">
+        <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-border/40 pb-6">
+          <CardTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Briefcase className="text-primary h-6 w-6" /> Post a New Job
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Create a new job listing to find the perfect candidate.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-8">
+          <form onSubmit={handlePostJob} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="title" className="text-secondary font-medium">Job Title</Label>
+                <div className="relative">
+                  <Input
+                    id="title"
+                    name="title"
+                    placeholder="e.g. Senior React Developer"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    className="pl-10 focus-visible:ring-primary"
+                  />
+                  <Briefcase className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
 
-          <input
-            className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-            type="text"
-            placeholder="Description"
-            name="description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-          />
+              <div className="space-y-2">
+                <Label htmlFor="jobType" className="text-secondary font-medium">Job Type</Label>
+                <Input
+                  id="jobType"
+                  name="jobType"
+                  placeholder="FULL_TIME, PART_TIME, CONTRACT"
+                  value={formData.jobType}
+                  onChange={handleChange}
+                  required
+                  className="focus-visible:ring-primary"
+                />
+              </div>
 
-          <input
-            className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-            type="text"
-            placeholder="Salary"
-            name="salary"
-            value={formData.salary}
-            onChange={(e) =>
-              setFormData({ ...formData, salary: e.target.value })
-            }
-          />
+              <div className="space-y-2 col-span-1 md:col-span-2">
+                <Label htmlFor="description" className="text-secondary font-medium">Description</Label>
+                <div className="relative">
+                  <Input
+                    as="textarea"
+                    id="description"
+                    name="description"
+                    placeholder="Describe the role responsibilities and requirements..."
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                    className="min-h-[120px] py-3 pl-3 focus-visible:ring-primary"
+                    style={{ height: 'auto' }} // Hack if Input component allows textarea styling or use native textarea
+                  />
+                  {/* Note: If Input component doesn't support 'as', we might need native textarea but styled with Input classes */}
+                  {/* Assuming Shadcn Input is a wrapped input, I'll use native textarea with Input classes for safety if unsure */}
+                </div>
+                {/* Fallback to native text area if Input doesn't handle multiline well */}
+                <textarea
+                  id="description"
+                  name="description"
+                  className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 mt-1"
+                  placeholder="Describe the role responsibilities and requirements..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-          <input
-            className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-            type="text"
-            placeholder="Address"
-            name="address"
-            value={formData.address}
-            onChange={(e) =>
-              setFormData({ ...formData, address: e.target.value })
-            }
-          />
+              <div className="space-y-2">
+                <Label htmlFor="salary" className="text-secondary font-medium">Salary</Label>
+                <div className="relative">
+                  <Input
+                    id="salary"
+                    name="salary"
+                    placeholder="e.g. $120k - $150k"
+                    value={formData.salary}
+                    onChange={handleChange}
+                    className="pl-10 focus-visible:ring-primary"
+                  />
+                  <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
 
-          <input
-            className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-            type="file"
-            placeholder="Job Picture"
-            name="jobPicture"
-            value={formData.jobPicture}
-            onChange={(e) =>
-              setFormData({ ...formData, jobPicture: e.target.value })
-            }
-          />
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-secondary font-medium">Location</Label>
+                <div className="relative">
+                  <Input
+                    id="address"
+                    name="address"
+                    placeholder="e.g. San Francisco, CA"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="pl-10 focus-visible:ring-primary"
+                  />
+                  <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
 
-          <input
-            className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-            type="text"
-            placeholder="Job Status"
-            name="jobStatus"
-            value={formData.jobStatus}
-            onChange={(e) =>
-              setFormData({ ...formData, jobStatus: e.target.value })
-            }
-          />
+              <div className="space-y-2">
+                <Label htmlFor="jobPicture" className="text-secondary font-medium">Job Image URL</Label>
+                <Input
+                  id="jobPicture"
+                  type="text" // Using text for URL as per original, can be file input if changed but API expects string?
+                  name="jobPicture"
+                  placeholder="https://..."
+                  value={formData.jobPicture}
+                  onChange={handleChange}
+                  className="focus-visible:ring-primary"
+                />
+              </div>
 
-          <input
-            className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-            type="text"
-            placeholder="PART_TIME or FULL_TIME or CONTRACT"
-            name="jobType"
-            value={formData.jobType}
-            onChange={(e) =>
-              setFormData({ ...formData, jobType: e.target.value })
-            }
-          />
+              <div className="space-y-2">
+                <Label htmlFor="jobStatus" className="text-secondary font-medium">Status</Label>
+                <Input
+                  id="jobStatus"
+                  name="jobStatus"
+                  placeholder="OPEN or CLOSED"
+                  value={formData.jobStatus}
+                  onChange={handleChange}
+                  className="focus-visible:ring-primary"
+                />
+              </div>
+            </div>
 
-          <button
-            type="submit"
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Post Job
-          </button>
-        </form>
-      </div>
-    </>
+            <div className="pt-4">
+              <Button type="submit" className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-md hover:shadow-lg" disabled={loading}>
+                {loading ? "Posting..." : "Create Job Listing"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

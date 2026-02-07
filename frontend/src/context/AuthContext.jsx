@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
                 try {
                     // Assuming there's a profile endpoint to get user details
                     // Swagger has /profile for GET
-                    const response = await api.get("/profile");
+                    const response = await api.get("/users/profile");
                     setUser(response.data);
                 } catch (error) {
                     console.error("Failed to load user", error);
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const response = await api.post("/login", { email, password });
+            const response = await api.post("/auth/login", { email, password });
             // Expecting { token: "...", user: { ... } } or similar
             // Swagger says 200 OK. Let's assume response body has token.
             const { token } = response.data;
@@ -42,8 +42,9 @@ export const AuthProvider = ({ children }) => {
             setToken(token);
 
             // Optionally fetch profile immediately
-            const profileResponse = await api.get("/profile");
+            const profileResponse = await api.get("/users/profile");
             setUser(profileResponse.data);
+            localStorage.setItem("profile", profileResponse.data.message.picture);
 
             return true;
         } catch (error) {
@@ -54,7 +55,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
-            await api.post("/register", userData);
+            await api.post("/auth/register", userData);
             // Auto login or redirect to login? 
             // Plan implies redirect to login or auto-login.
             // Usually register returns 201 Created.
@@ -67,6 +68,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("profile");
         setToken(null);
         setUser(null);
         window.location.href = "/";

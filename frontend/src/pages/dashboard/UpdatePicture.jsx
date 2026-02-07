@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import api from "../../lib/api";
 import { Button } from "@/components/ui/button";
-import { Folder, UploadCloud, Loader2 } from 'lucide-react';
+import { Folder, UploadCloud, Loader2, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-const UpdatePicture = () => {
+export const UpdatePicture = () => {
     const navigate = useNavigate();
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);
@@ -35,7 +36,7 @@ const UpdatePicture = () => {
         formData.append('profilePicture', image);
 
         try {
-            const response = await api.patch("/uploadProfilePicture", formData, {
+            const response = await api.patch("/users/uploadProfilePicture", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -57,68 +58,84 @@ const UpdatePicture = () => {
     }
 
     return (
-        <div className='min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4'>
-            <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
-                <h1 className='text-2xl font-bold text-center mb-8 text-gray-800'>Update Profile Picture</h1>
-
-                <form onSubmit={handleUploadImage} className="flex flex-col gap-6">
-                    <div className="flex flex-col items-center">
-                        <label
-                            htmlFor="imageInput"
-                            className={`
-                                relative flex flex-col items-center justify-center w-full h-64 
-                                border-2 border-dashed rounded-lg cursor-pointer 
-                                transition-colors duration-200 ease-in-out
-                                ${preview ? 'border-primary bg-gray-50' : 'border-gray-300 hover:bg-gray-50'}
-                            `}
-                        >
-                            {preview ? (
-                                <img
-                                    src={preview}
-                                    alt="Preview"
-                                    className="w-full h-full object-contain rounded-lg p-2"
+        <div className='min-h-screen bg-background flex flex-col items-center justify-center p-4'>
+            <Card className="w-full max-w-md shadow-lg border-primary/20">
+                <CardHeader className="text-center">
+                    <CardTitle className="text-2xl font-bold text-foreground">Update Profile Picture</CardTitle>
+                    <CardDescription>Choose a professional photo to display on your profile.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleUploadImage} className="flex flex-col gap-6">
+                        <div className="flex flex-col items-center">
+                            <label
+                                htmlFor="imageInput"
+                                className={`
+                                    relative flex flex-col items-center justify-center w-full h-64 
+                                    border-2 border-dashed rounded-lg cursor-pointer 
+                                    transition-all duration-300 ease-in-out
+                                    ${preview ? 'border-primary bg-primary/5' : 'border-input hover:bg-accent/5 hover:border-primary/50'}
+                                `}
+                            >
+                                {preview ? (
+                                    <div className="relative w-full h-full p-4 flex items-center justify-center">
+                                        <img
+                                            src={preview}
+                                            alt="Preview"
+                                            className="max-h-full max-w-full object-contain rounded-lg shadow-sm"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+                                            <p className="text-white font-medium">Click to change</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground group">
+                                        <div className="p-4 bg-background rounded-full mb-3 shadow-sm group-hover:scale-110 transition-transform">
+                                            <UploadCloud className="w-8 h-8 text-primary" />
+                                        </div>
+                                        <p className="mb-2 text-sm font-semibold">Click to upload or drag and drop</p>
+                                        <p className="text-xs">SVG, PNG, JPG or GIF (MAX. 3MB)</p>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    id="imageInput"
+                                    name="image"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                    required
                                 />
-                            ) : (
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-gray-500">
-                                    <UploadCloud className="w-12 h-12 mb-4" />
-                                    <p className="mb-2 text-sm font-semibold">Click to upload or drag and drop</p>
-                                    <p className="text-xs">SVG, PNG, JPG or GIF (MAX. 3MB)</p>
-                                </div>
-                            )}
-                            <input
-                                type="file"
-                                id="imageInput"
-                                name="image"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={handleFileChange}
-                                required
-                            />
-                        </label>
-                    </div>
+                            </label>
+                        </div>
 
-                    <Button
-                        type="submit"
-                        className="w-full py-6 text-lg"
-                        disabled={isLoading || !image}
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                Uploading...
-                            </>
-                        ) : (
-                            "Upload Picture"
-                        )}
-                    </Button>
-                </form>
-
-                <div className="mt-4 text-center">
-                    <p className="text-xs text-gray-400">Ensure your image is professional and clearly visible.</p>
-                </div>
-            </div>
+                        <div className="flex gap-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => navigate('/dashboard')}
+                                disabled={isLoading}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                                disabled={isLoading || !image}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        Uploading...
+                                    </>
+                                ) : (
+                                    "Upload Picture"
+                                )}
+                            </Button>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     );
 };
-
-export default UpdatePicture;
