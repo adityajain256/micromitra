@@ -105,9 +105,10 @@ const RecruiterDashboard = () => {
           <div className="divide-y divide-border">
             {jobs.length > 0 ? (
               jobs.map((job) => (
-                <div
+                <Link
                   key={job._id || job.id}
-                  className="hover:bg-accent/5 transition-colors p-4 sm:px-6"
+                  to={`/manage-job/${job._id || job.id}`}
+                  className="block hover:bg-accent/5 transition-colors p-4 sm:px-6"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -121,22 +122,35 @@ const RecruiterDashboard = () => {
                         <p className="text-xs text-muted-foreground">{job.jobType}</p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span
-                        className={`px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col items-end gap-1">
+                        <span
+                          className={`px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${job.jobStatus === "OPEN"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                          }`}
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                          {job.jobStatus}
+                        </span>
+                        <p className="text-xs text-muted-foreground">
+                          {job.salary}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary hover:text-primary/80"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // Navigation handled by Link parent
+                        }}
                       >
-                        {job.jobStatus}
-                      </span>
-                      <p className="text-xs text-muted-foreground">
-                        {job.salary}
-                      </p>
+                        Manage →
+                      </Button>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             ) : (
               <div className="p-8 text-center text-muted-foreground">No jobs posted yet.</div>

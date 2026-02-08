@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import logo from "/Users/devaditya/dev/webApplication/micromitra/frontend/public/logo.png";
+import logo from "/logo.png";
 
 const Navbar = () => {
   const location = useLocation();
@@ -75,7 +75,7 @@ const Navbar = () => {
                     <Avatar className="h-10 w-10 border-2 border-primary/20 hover:border-primary transition-colors">
                       <AvatarImage src={user?.avatar || localStorage.getItem("profile")} alt={user?.name} className="object-cover" />
                       <AvatarFallback className="bg-secondary text-secondary-foreground">
-                        {user?.name?.charAt(0) || "U"}
+                        {user?.message?.name || "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -83,9 +83,9 @@ const Navbar = () => {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
+                      <p className="text-sm font-medium leading-none">{user?.message?.name || "User"}</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {user?.email || "user@example.com"}
+                        {user?.message?.email || "user@example.com"}
                       </p>
                     </div>
                   </DropdownMenuLabel>

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid, Bookmark, Briefcase, Settings, MapPin, Clock } from "lucide-react";
+import { Grid, Bookmark, Briefcase, Settings, MapPin, Clock, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,13 +13,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 
 const Dashboard = () => {
   const [profile, setProfile] = useState({});
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const handleGetProfile = async () => {
     try {
@@ -27,12 +29,28 @@ const Dashboard = () => {
       const data = response.data;
       setProfile(data.message || {});
       setJobs(data.message?.recruter?.jobs?.reverse() || []);
-      setApplications(data.message?.jobseeker?.applications || []);
+      setApplications(data.message?.jobSeeker?.applications?.reverse() || []);
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch profile", error);
       setLoading(false);
     }
+  };
+
+  const handleDelete = (jobId) => {
+    try {
+      const response = api.delete(`/jobs/job/${jobId}`);
+      const data = response.data;
+      setJobs(data.message || []);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to delete job", error);
+      setLoading(false);
+    }
+  }
+
+  const handleManageJob = (jobId) => {
+    navigate(`/manage-job/${jobId}`);
   };
 
   useEffect(() => {
@@ -88,7 +106,7 @@ const Dashboard = () => {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-secondary">
-                  {profile.role === "RECRUITER" ? applications.length : "12"} {/* Mock 'active' or use real data */}
+                  {profile.role === "RECRUITER" ? applications.length : "0"} {/* Mock 'active' or use real data */}
                 </div>
                 <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                   {profile.role === "RECRUITER" ? "Candidates" : "Active"}
@@ -126,32 +144,32 @@ const Dashboard = () => {
 
           <TabsContent value="applications" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(profile.role === "RECRUITER" ? jobs : jobs).length > 0 ? (
-                (profile.role === "RECRUITER" ? jobs : jobs).map((job) => ( /* Note: Logic might need fix if jobseeker has no 'jobs' but 'applications' */
+              {(profile.role === "RECRUITER" ? jobs : applications).length > 0 ? (
+                (profile.role === "RECRUITER" ? jobs : applications).map((job) => ( /* Note: Logic might need fix if jobseeker has no 'jobs' but 'applications' */
                   <Card key={job.id || job._id} className="group hover:shadow-lg transition-all duration-300 border-border/60 hover:border-primary/50 overflow-hidden bg-white">
                     <CardHeader className="bg-muted/30 pb-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-lg font-bold text-foreground line-clamp-1">{job.title}</CardTitle>
+                          <CardTitle className="text-lg font-bold text-foreground line-clamp-1">{job.title || job.job.title}</CardTitle>
                           <CardDescription className="flex items-center mt-1 text-xs">
-                            <MapPin className="w-3 h-3 mr-1" /> {job.address || "Remote"}
+                            <MapPin className="w-3 h-3 mr-1" /> {job.address || job.job.address || "Remote"}
                           </CardDescription>
                         </div>
-                        <div className="bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded">
-                          {job.jobType || "Full Time"}
+                        <div className={`bg-primary/10 text-primary text-s font-semibold px-2 py-1 rounded`}>
+                          {job.jobType || job.status || "Full Time"}
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-4">
                       <p className="text-sm text-muted-foreground line-clamp-3">
-                        {job.description}
+                        {job.description || job.job.description}
                       </p>
                       <div className="flex items-center mt-4 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3 mr-1" /> Posted {new Date().toLocaleDateString()} {/* Mock date if missing */}
                       </div>
                     </CardContent>
-                    <CardFooter className="pt-2 pb-4">
-                      <Button className="w-full bg-secondary hover:bg-secondary/90 text-white group-hover:translate-y-[-2px] transition-transform">
+                    <CardFooter onClick={() => handleManageJob(job.id)} className="pt-2 pb-4">
+                      <Button className={`w-full bg-secondary hover:bg-secondary/90 text-white group-hover:translate-y-[-2px] transition-transform ${profile.role === "JOBSEEKER" ? "hidden" : ""}`}>
                         {profile.role === "RECRUITER" ? "Manage Job" : "View Details"}
                       </Button>
                     </CardFooter>

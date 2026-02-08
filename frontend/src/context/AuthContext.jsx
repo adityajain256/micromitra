@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
 
             // Optionally fetch profile immediately
             const profileResponse = await api.get("/users/profile");
-            setUser(profileResponse.data);
+            setUser(profileResponse.message);
             localStorage.setItem("profile", profileResponse.data.message.picture);
 
             return true;

@@ -12,6 +12,7 @@ import Dashboard from "./pages/dashboard/Dashboard.jsx";
 import { UpdatePicture } from "./pages/dashboard/UpdatePicture";
 import EditProfile from "./pages/dashboard/EditProfile";
 import Jobs from "./pages/jobs/Jobs";
+import ManageJob from "./pages/ManageJob";
 
 function App() {
   return (
@@ -24,7 +25,8 @@ function App() {
             <Route path="/edit-profile" element={<EditProfile />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/recruiter" element={<RecruiterDashboard />} />
+            {/* <Route path="/recruiter" element={<RecruiterDashboard />} /> */}
+            <Route path="/manage-job/:jobId" element={<ManageJob />} />
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

@@ -30,6 +30,7 @@ const Landing = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedJob, setSelectedJob] = useState(null);
   const [openSmallWindow, setOpenSmallWindow] = useState(false);
+  const [applied, setApplied] = useState(false);
 
   // fetching data from server using fetch
   const fetchJobs = async () => {
@@ -43,6 +44,7 @@ const Landing = () => {
       if (Array.isArray(jobsData) && jobsData.length > 0) {
         setSelectedJob(jobsData[0]); // Select first job by default
       }
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -54,6 +56,7 @@ const Landing = () => {
     try {
       const response = await api.post(`/applications`, { jobId });
       const data = response.data;
+      (applied == false) ? setApplied(true) : setApplied(false);
       console.log(data);
     } catch (error) {
       console.error(error);
@@ -285,7 +288,7 @@ const Landing = () => {
                       Close
                     </Button>
                     <Button onClick={() => handleApply(selectedJob.id)} className="flex-1 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md">
-                      Apply Now
+                      {(!applied) ? "Apply Now" : "Apllied"}
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </CardFooter>
