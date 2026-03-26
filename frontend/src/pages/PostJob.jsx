@@ -4,7 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Briefcase, MapPin, DollarSign, FileText } from "lucide-react";
 
 export const PostJob = () => {
@@ -58,7 +64,9 @@ export const PostJob = () => {
           <form onSubmit={handlePostJob} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-secondary font-medium">Job Title</Label>
+                <Label htmlFor="title" className="text-secondary font-medium">
+                  Job Title
+                </Label>
                 <div className="relative">
                   <Input
                     id="title"
@@ -74,7 +82,9 @@ export const PostJob = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="jobType" className="text-secondary font-medium">Job Type</Label>
+                <Label htmlFor="jobType" className="text-secondary font-medium">
+                  Job Type
+                </Label>
                 <Input
                   id="jobType"
                   name="jobType"
@@ -87,7 +97,12 @@ export const PostJob = () => {
               </div>
 
               <div className="space-y-2 col-span-1 md:col-span-2">
-                <Label htmlFor="description" className="text-secondary font-medium">Description</Label>
+                <Label
+                  htmlFor="description"
+                  className="text-secondary font-medium"
+                >
+                  Description
+                </Label>
                 <div className="relative">
                   <Input
                     as="textarea"
@@ -98,25 +113,15 @@ export const PostJob = () => {
                     onChange={handleChange}
                     required
                     className="min-h-[120px] py-3 pl-3 focus-visible:ring-primary"
-                    style={{ height: 'auto' }} // Hack if Input component allows textarea styling or use native textarea
+                    style={{ height: "auto" }} // Hack if Input component allows textarea styling or use native textarea
                   />
-                  {/* Note: If Input component doesn't support 'as', we might need native textarea but styled with Input classes */}
-                  {/* Assuming Shadcn Input is a wrapped input, I'll use native textarea with Input classes for safety if unsure */}
                 </div>
-                {/* Fallback to native text area if Input doesn't handle multiline well */}
-                <textarea
-                  id="description"
-                  name="description"
-                  className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 mt-1"
-                  placeholder="Describe the role responsibilities and requirements..."
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="salary" className="text-secondary font-medium">Salary</Label>
+                <Label htmlFor="salary" className="text-secondary font-medium">
+                  Salary
+                </Label>
                 <div className="relative">
                   <Input
                     id="salary"
@@ -131,7 +136,9 @@ export const PostJob = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address" className="text-secondary font-medium">Location</Label>
+                <Label htmlFor="address" className="text-secondary font-medium">
+                  Location
+                </Label>
                 <div className="relative">
                   <Input
                     id="address"
@@ -146,7 +153,12 @@ export const PostJob = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="jobPicture" className="text-secondary font-medium">Job Image URL</Label>
+                <Label
+                  htmlFor="jobPicture"
+                  className="text-secondary font-medium"
+                >
+                  Job Image URL
+                </Label>
                 <Input
                   id="jobPicture"
                   type="text" // Using text for URL as per original, can be file input if changed but API expects string?
@@ -159,7 +171,12 @@ export const PostJob = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="jobStatus" className="text-secondary font-medium">Status</Label>
+                <Label
+                  htmlFor="jobStatus"
+                  className="text-secondary font-medium"
+                >
+                  Status
+                </Label>
                 <Input
                   id="jobStatus"
                   name="jobStatus"
@@ -172,7 +189,11 @@ export const PostJob = () => {
             </div>
 
             <div className="pt-4">
-              <Button type="submit" className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-md hover:shadow-lg" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-all shadow-md hover:shadow-lg"
+                disabled={loading}
+              >
                 {loading ? "Posting..." : "Create Job Listing"}
               </Button>
             </div>
