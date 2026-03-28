@@ -16,7 +16,7 @@ const Login = () => {
         setLoading(true);
         try {
             await login(data.email, data.password);
-            window.location.href = "/dashboard"; // Redirect after successful login
+            window.location.href = "/"; // Redirect after successful login
         } catch (error) {
             console.error("Login Error:", error);
             alert(error.response?.data?.message || "Login failed");

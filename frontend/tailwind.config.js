@@ -7,10 +7,7 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: "#4F46E5", // Indigo
-                secondary: "#10B981", // Emerald
-                background: "#F9FAFB", // Gray-50
-                text: "#1F2937", // Gray-800
+                // Relying on CSS variables defined in index.css for theme colors
             }
         },
     },

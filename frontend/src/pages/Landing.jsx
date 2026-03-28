@@ -8,6 +8,7 @@ import {
   Briefcase,
   ChevronRight,
   Loader2,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,47 +21,30 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const Landing = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedJob, setSelectedJob] = useState(null);
-  //   const [filterType, setFilterType] = useState("all");
   const [openSmallWindow, setOpenSmallWindow] = useState(false);
+  const [applied, setApplied] = useState(false);
 
   // fetching data from server using fetch
   const fetchJobs = async () => {
-    // Landing page might need to be accessible without token?
-    // Swagger says /jobs has Authorization param in header? Yes.
-    // So user MUST be logged in to see jobs? 
-    // If Landing is public, maybe /jobs key allows public access?
-    // Swagger says parameters: name: Authorization, in: header.
-    // So better keep token logic.
-    const token = localStorage.getItem("token");
-
-    // if (!token) {
-    //   // If landing is public, we might skip this. But if API requires it...
-    //   // Let's assume public access for now as it is "Landing", but if API fails 401, we handle it.
-    //   // Actually original code required token.
-    //   console.error("No authentication token found");
-    //   setLoading(false);
-    //   return;
-    // }
-
     try {
       setLoading(true);
-      // Use api utility which handles token automatically if present.
-      // But if user is NOT logged in, token is null.
-      // If endpoint requires token, it will fail.
       const response = await api.get("/jobs");
       const data = response.data;
-      if (data.jobs && data.jobs.length > 0) {
-        setJobs(data.jobs);
+      // Handle structure variations in API response
+      const jobsData = data.jobs || data.message || data || [];
+      setJobs(Array.isArray(jobsData) ? jobsData : []);
+
+      if (Array.isArray(jobsData) && jobsData.length > 0) {
+        setSelectedJob(jobsData[0]); // Select first job by default
       }
-      console.log(data.jobs);
     } catch (error) {
       console.error(error);
     } finally {
@@ -68,64 +52,64 @@ const Landing = () => {
     }
   };
 
+  const handleApply = async (jobId, candidateId, recruiterId) => {
+    try {
+      const response = await api.post(`/applications`, { jobId });
+      const data = response.data;
+      // socket.emit("jobApplied", {
+      //   jobId,
+      //   candidateId,
+      //   recruiterId,
+      // });
+      setApplied(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchJobs();
   }, []);
 
-  //   const filteredJobs = jobs
-  //     .filter(
-  //       (job) =>
-  //         job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //         job.company?.toLowerCase().includes(searchTerm.toLowerCase()),
-  //     )
-  //     .filter((job) => {
-  //       if (filterType === "saved") return false;
-  //       return true;
-  //     });
-
   return (
-    <div className={`min-h-screen bg-linear-to-br from-gray-50 to-gray-100 `}>
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header Section */}
       <div
-        className={`bg-white border-b border-gray-200 sticky top-0 z-10 ${openSmallWindow ? "blur-sm" : ""}`}
+        className={`bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-20 ${openSmallWindow ? "blur-sm" : ""}`}
       >
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">
                 Find Your Next Job
               </h1>
-              <p className="text-gray-600 mt-1">
-                Discover opportunities that match your skills
+              <p className="text-muted-foreground mt-1">
+                Discover opportunities that match your skills.
               </p>
             </div>
 
             {/* Search and Filter Bar */}
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 <Input
-                  placeholder="Search by job title or company..."
-                  className="pl-10"
+                  placeholder="Search by job title, company, or keywords..."
+                  className="pl-10 bg-background border-input focus-visible:ring-primary h-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant={"default"}
-                  onClick={() => { }}
-                  className="gap-2"
-                >
+                <Button className="gap-2 bg-secondary hover:bg-secondary/90 text-white shadow-sm">
                   <Briefcase className="h-4 w-4" />
                   All Jobs
                 </Button>
-                {/* <Button
-                  variant={filterType === "saved" ? "default" : "outline"}
-                  onClick={() => setFilterType("saved")}
-                  className="gap-2"
+                <Button
+                  variant="outline"
+                  className="gap-2 text-muted-foreground hover:text-foreground"
                 >
-                </Button> */}
+                  <Filter className="h-4 w-4" /> Filter
+                </Button>
               </div>
             </div>
           </div>
@@ -136,111 +120,85 @@ const Landing = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Jobs Section */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         ) : jobs.length === 0 ? (
-          <Card>
+          <Card className="border-dashed border-2">
             <CardContent className="pt-12 pb-12 text-center">
-              <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-700 mb-2">
+              <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
                 No jobs found
               </h3>
-              <p className="text-gray-500">
-                {"Try adjusting your search criteria"}
+              <p className="text-muted-foreground">
+                Try adjusting your search criteria or come back later.
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8`}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Jobs List */}
             <div
               className={`lg:col-span-2 space-y-4 ${openSmallWindow ? "blur-sm" : ""}`}
             >
               {jobs.map((job) => (
                 <Card
-                  key={job._id}
-                  className={`cursor-pointer transition-all hover:shadow-lg ${selectedJob?._id === job._id ? "ring-2 ring-blue-500" : ""
-                    }`}
+                  key={job._id || job.id}
+                  className={`cursor-pointer transition-all hover:shadow-lg border-l-4 ${
+                    selectedJob?._id === job._id || selectedJob?.id === job.id
+                      ? "border-l-primary ring-1 ring-primary/20 bg-primary/5"
+                      : "border-l-transparent hover:border-l-primary/50"
+                  }`}
                   onClick={() => {
                     setSelectedJob(job);
-                    openSmallWindow == true
-                      ? setOpenSmallWindow(false)
-                      : setOpenSmallWindow(true);
+                    setOpenSmallWindow(!openSmallWindow);
                   }}
                 >
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1 max-sm:w-screen max-sm:h-auto">
-                        {!job.picture || job.picture === "" ? (
-                          <div> </div>
-                        ) : (
-                          // <div className="w-fit aspect-square">
-                          //   <img
-                          //     src={
-                          //       "https://img.lb.wbmdstatic.com/vim/live/webmd/consumer_assets/site_images/articles/health_tools/healing_foods_slideshow/1800ss_getty_rf_apples.jpg?resize=750px:*&output-quality=75"
-                          //     }
-                          //     alt={job.title}
-                          //     className="h-full w-full object-cover"
-                          //   />
-                          // </div>
-                          <div className="w-fit aspect-square">
+                      <div className="flex-1 w-full">
+                        <div className="flex gap-4">
+                          {job.jobPicture && (
                             <img
-                              src={job.picture}
-                              alt={job.title}
-                              className="h-full w-full object-cover"
+                              src={job.jobPicture}
+                              alt="Company Logo"
+                              className="w-12 h-12 rounded-lg object-cover bg-muted"
                             />
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {job.title || "Job Title"}
-                          </h3>
-                          {job.featured && (
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
-                              Featured
-                            </span>
                           )}
-                        </div>
-                        <p className="text-gray-600 mb-3">{job.company}</p>
-
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {job.address || "Location"}
+                          <div>
+                            <h3 className="text-xl font-bold text-foreground">
+                              {job.title || "Job Title"}
+                            </h3>
+                            <p className="text-primary font-medium text-sm">
+                              {job.recruiter.user.name || "Company Name"}
+                            </p>
+                            <p className="text-primary font-medium text-sm">
+                              {job.recruiter.user.email || "Company Name"}
+                            </p>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {job.type || "Full-time"}
+                        </div>
+
+                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mt-3 mb-3">
+                          <div className="flex items-center gap-1 bg-background px-2 py-1 rounded border border-border">
+                            <MapPin className="h-3 w-3" />
+                            {job.address || "Remote"}
+                          </div>
+                          <div className="flex items-center gap-1 bg-background px-2 py-1 rounded border border-border">
+                            <Clock className="h-3 w-3" />
+                            {job.jobType || "Full-time"}
                           </div>
                           {job.salary && (
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4" />
+                            <div className="flex items-center gap-1 bg-background px-2 py-1 rounded border border-border">
+                              <DollarSign className="h-3 w-3" />
                               {job.salary}
                             </div>
                           )}
                         </div>
 
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {job.description || "Job description..."}
+                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                          {job.description || "No description provided."}
                         </p>
                       </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSaveJob(job._id);
-                        }}
-                        className="shrink-0"
-                      >
-                        {/* <Heart
-                          className={`h-6 w-6 transition-colors ${
-                            savedJobs.includes(job._id)
-                              ? "fill-red-500 text-red-500"
-                              : "text-gray-300 hover:text-red-500"
-                          }`}
-                        /> */}
-                      </button>
                     </div>
                   </CardContent>
                 </Card>
@@ -250,54 +208,64 @@ const Landing = () => {
             {/* Job Details Sidebar */}
             {selectedJob ? (
               <div
-                className={`lg:col-span-1 max-sm:flex max-sm:justify-center max-sm:items-center `}
+                className={`lg:col-span-1 border-l border-border pl-0 lg:pl-8 ${openSmallWindow ? "fixed inset-0 z-50 bg-background/50 backdrop-blur-sm p-4 flex items-center justify-center lg:static lg:bg-transparent lg:p-0 lg:block" : "hidden lg:block sticky top-24 h-fit"}`}
+                onClick={() => setOpenSmallWindow(false)}
               >
                 <Card
-                  className={`sticky top-24 max-h-[calc(100vh-120px)]  overflow-y-auto max-sm:top-70   ${openSmallWindow ? "max-sm:fixed" : "max-sm:hidden"}`}
+                  className={`w-full max-w-lg lg:max-w-none max-h-[85vh] overflow-y-auto shadow-xl lg:shadow-md border-primary/20 bg-card`}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <CardHeader>
-                    <CardTitle>{selectedJob.title}</CardTitle>
-                    <CardDescription>{selectedJob.company}</CardDescription>
+                  <CardHeader className="bg-primary/5 pb-6">
+                    <CardTitle className="text-xl font-bold text-foreground">
+                      {selectedJob.title}
+                    </CardTitle>
+                    <CardDescription className="text-primary font-medium">
+                      {selectedJob.recruiter.user.name || "Company Name"}
+                    </CardDescription>
+                    <CardDescription className="text-primary font-medium">
+                      {selectedJob.recruiter.user.email || "Company Name"}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 pt-6">
                     {/* Key Details */}
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-gray-600 text-xs uppercase tracking-wider">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-muted/30 p-3 rounded-lg">
+                        <Label className="text-muted-foreground text-xs uppercase tracking-wider">
                           Location
                         </Label>
-                        <p className="mt-1 font-medium">
-                          {selectedJob.address}
+                        <p className="mt-1 font-medium text-foreground text-sm flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />{" "}
+                          {selectedJob.address || "Remote"}
                         </p>
                       </div>
-                      <div>
-                        <Label className="text-gray-600 text-xs uppercase tracking-wider">
-                          Job Type
+                      <div className="bg-muted/30 p-3 rounded-lg">
+                        <Label className="text-muted-foreground text-xs uppercase tracking-wider">
+                          Type
                         </Label>
-                        <p className="mt-1 font-medium">
-                          {selectedJob.jobType}
+                        <p className="mt-1 font-medium text-foreground text-sm flex items-center gap-1">
+                          <Clock className="w-3 h-3" />{" "}
+                          {selectedJob.jobType || "Full Time"}
                         </p>
                       </div>
-                      {selectedJob.salary && (
-                        <div>
-                          <Label className="text-gray-600 text-xs uppercase tracking-wider">
-                            Salary
-                          </Label>
-                          <p className="mt-1 font-medium">
-                            {selectedJob.salary}
-                          </p>
-                        </div>
-                      )}
+                      <div className="col-span-2 bg-muted/30 p-3 rounded-lg">
+                        <Label className="text-muted-foreground text-xs uppercase tracking-wider">
+                          Salary
+                        </Label>
+                        <p className="mt-1 font-medium text-foreground text-sm flex items-center gap-1">
+                          <DollarSign className="w-3 h-3" />{" "}
+                          {selectedJob.salary || "Not Disclosed"}
+                        </p>
+                      </div>
                     </div>
 
                     <Separator />
 
                     {/* Description */}
                     <div>
-                      <Label className="text-gray-600 text-xs uppercase tracking-wider mb-3 block">
+                      <Label className="text-foreground text-sm font-bold mb-3 block">
                         Description
                       </Label>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                         {selectedJob.description}
                       </p>
                     </div>
@@ -307,36 +275,34 @@ const Landing = () => {
                       <>
                         <Separator />
                         <div>
-                          <Label className="text-gray-600 text-xs uppercase tracking-wider mb-3 block">
+                          <Label className="text-foreground text-sm font-bold mb-3 block">
                             Requirements
                           </Label>
-                          <ul className="text-sm text-gray-600 space-y-2">
+                          <ul className="text-sm text-muted-foreground space-y-2">
                             {Array.isArray(selectedJob.requirements)
                               ? selectedJob.requirements.map((req, idx) => (
-                                <li
-                                  key={`${req}-${idx}`}
-                                  className="flex gap-2"
-                                >
-                                  <span className="text-blue-500 mt-1">
-                                    •
-                                  </span>
-                                  {req}
-                                </li>
-                              ))
+                                  <li
+                                    key={`${req}-${idx}`}
+                                    className="flex gap-2"
+                                  >
+                                    <span className="text-primary mt-1">•</span>
+                                    {req}
+                                  </li>
+                                ))
                               : typeof selectedJob.requirements === "string"
                                 ? selectedJob.requirements
-                                  .split("\n")
-                                  .map((req, idx) => (
-                                    <li
-                                      key={`${req}-${idx}`}
-                                      className="flex gap-2"
-                                    >
-                                      <span className="text-blue-500 mt-1">
-                                        •
-                                      </span>
-                                      {req}
-                                    </li>
-                                  ))
+                                    .split("\n")
+                                    .map((req, idx) => (
+                                      <li
+                                        key={`${req}-${idx}`}
+                                        className="flex gap-2"
+                                      >
+                                        <span className="text-primary mt-1">
+                                          •
+                                        </span>
+                                        {req}
+                                      </li>
+                                    ))
                                 : null}
                           </ul>
                         </div>
@@ -344,22 +310,37 @@ const Landing = () => {
                     )}
                   </CardContent>
 
-                  <CardFooter className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
-                      Apply Later
+                  <CardFooter className="flex gap-3 pt-2 bg-muted/20 border-t border-border">
+                    <Button
+                      variant="outline"
+                      className="flex-1 bg-background hover:bg-muted"
+                      onClick={() => setOpenSmallWindow(false)}
+                    >
+                      Close
                     </Button>
-                    <Button className="flex-1 gap-2">
-                      Apply Now
+                    <Button
+                      onClick={() =>
+                        handleApply(
+                          selectedJob.id,
+                          localStorage.getItem("profileId"),
+                          selectedJob.recruiterId,
+                        )
+                      }
+                      className="flex-1 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                    >
+                      {!applied ? "Apply Now" : "Apllied"}
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </CardFooter>
                 </Card>
               </div>
             ) : (
-              <Card className="lg:col-span-1 sticky top-24 h-fit">
+              <Card className="lg:col-span-1 sticky top-24 h-fit hidden lg:block bg-muted/20 border-dashed">
                 <CardContent className="pt-12 pb-12 text-center">
-                  <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">Select a job to view details</p>
+                  <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">
+                    Select a job to view details
+                  </p>
                 </CardContent>
               </Card>
             )}
