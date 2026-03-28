@@ -13,21 +13,21 @@ import { UpdatePicture } from "./pages/dashboard/UpdatePicture";
 import EditProfile from "./pages/dashboard/EditProfile";
 import Jobs from "./pages/jobs/Jobs";
 import ManageJob from "./pages/ManageJob";
-import { socket } from "./socket";
+
 import { Alert } from "./components/Alert";
 
 function App({ userId }) {
-  const [socketId, setSocketId] = React.useState("");
+  // const [socketId, setSocketId] = React.useState("");
   const [alert, setAlert] = React.useState(null);
 
-  React.useEffect(() => {
-    socket.emit("registerUser", userId);
-    socket.on("applicationUpdate", (data) => {
-      alert(`Your application was ${data.status}`);
-    });
+  // React.useEffect(() => {
+  //   socket.emit("registerUser", userId);
+  //   socket.on("applicationUpdate", (data) => {
+  //     alert(`Your application was ${data.status}`);
+  //   });
 
-    return () => socket.off("applicationUpdate");
-  }, [userId]);
+  //   return () => socket.off("applicationUpdate");
+  // }, [userId]);
 
   return (
     <AuthProvider>
@@ -41,10 +41,7 @@ function App({ userId }) {
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/dashboard" element={<Dashboard />} />
             {/* <Route path="/recruiter" element={<RecruiterDashboard />} /> */}
-            <Route
-              path="/manage-job/:jobId"
-              element={<ManageJob socketId={socketId} />}
-            />
+            <Route path="/manage-job/:jobId" element={<ManageJob />} />
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

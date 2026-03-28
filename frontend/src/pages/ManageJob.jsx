@@ -23,9 +23,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Alert } from "@/components/Alert";
-import { socket } from "../socket";
+// import { socket } from "../socket";
 
-const ManageJob = ({ socketId }) => {
+const ManageJob = () => {
   const navigate = useNavigate();
   const { jobId } = useParams();
   const [job, setJob] = useState(null);

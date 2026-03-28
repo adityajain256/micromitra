@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { socket } from "../socket.js";
+
 const Landing = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,11 +56,11 @@ const Landing = () => {
     try {
       const response = await api.post(`/applications`, { jobId });
       const data = response.data;
-      socket.emit("jobApplied", {
-        jobId,
-        candidateId,
-        recruiterId,
-      });
+      // socket.emit("jobApplied", {
+      //   jobId,
+      //   candidateId,
+      //   recruiterId,
+      // });
       setApplied(true);
     } catch (error) {
       console.error(error);
